@@ -21,10 +21,10 @@ WARNING_RULES = {
         "share your pin",
     ],
     "suspicious links": [
-    "http://",
-    "https://",
-    "bit.ly",
-    "tinyurl.com",
+        "http://",
+        "https://",
+        "bit.ly",
+        "tinyurl.com",
     ],
 }
 
@@ -80,6 +80,7 @@ def main():
         for finding in findings:
             print(f"\nCategory: {finding['category']}")
             print("Matched phrases:")
+
             for phrase in finding["matched_phrases"]:
                 print(f"  - {phrase}")
 
