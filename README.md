@@ -19,6 +19,10 @@ The project was built to practice Python programming, regular expressions, autom
 - **Input validation:** Rejects empty messages and non-string inputs in the analysis function.
 - **Automated tests:** Uses Python's built-in `unittest` framework to verify expected behavior.
 
+## Application Preview
+
+![ScamSieve desktop interface](screenshots/scamsieve-gui.png)
+
 ## Requirements
 
 - Python 3.10 or later recommended
