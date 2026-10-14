@@ -1,40 +1,90 @@
 
-def analyze_message(message):
-    """Identify basic warning signs in a suspicious message."""
-    warning_signs = {
-        "urgent language": ["urgent", "immediately", "act now"],
-        "financial requests": ["send money", "payment required"],
-        "sensitive information": ["share otp", "password", "pin"],
-        "suspicious links": ["http://", "bit.ly", "tinyurl.com"],
-    }
+import re
 
+
+WARNING_RULES = {
+    "urgent language": [
+        "urgent",
+        "immediately",
+        "act now",
+        "within 24 hours",
+    ],
+    "financial requests": [
+        "send money",
+        "payment required",
+        "pay now",
+    ],
+    "sensitive information": [
+        "share otp",
+        "one time password",
+        "share your password",
+        "share your pin",
+    ],
+    "suspicious links": [
+    "http://",
+    "https://",
+    "bit.ly",
+    "tinyurl.com",
+    ],
+}
+
+
+def analyze_message(message):
+    """Return warning categories and the phrases that triggered them."""
+
+    if not isinstance(message, str):
+        raise TypeError("Message must be a string.")
+
+    if not message.strip():
+        raise ValueError("Message cannot be empty.")
+
+    normalized_message = message.lower()
     findings = []
 
-    message_lower = message.lower()
+    for category, keywords in WARNING_RULES.items():
+        matched_phrases = []
 
-    for category, keywords in warning_signs.items():
         for keyword in keywords:
-            if keyword in message_lower:
-                findings.append(category)
-                break
+            pattern = r"\b" + re.escape(keyword) + r"\b"
+
+            if re.search(pattern, normalized_message):
+                matched_phrases.append(keyword)
+
+        if matched_phrases:
+            findings.append({
+                "category": category,
+                "matched_phrases": matched_phrases,
+            })
 
     return findings
 
 
 def main():
-    message = input("Paste a message to analyze: ")
-    findings = analyze_message(message)
+    print("=== ScamSieve ===")
+    print("Analyze a message for configured warning signs.")
+    print("This tool cannot confirm whether a message is safe.\n")
 
-    print("\n--- ScamSieve Analysis ---")
+    message = input("Paste a message: ")
 
-    if findings:
-        print("Warning signs detected:")
-        for finding in findings:
-            print(f"- {finding}")
-    else:
+    try:
+        findings = analyze_message(message)
+    except (TypeError, ValueError) as error:
+        print(f"\nInput error: {error}")
+        return
+
+    print("\n=== Analysis Results ===")
+
+    if not findings:
         print("No configured warning signs detected.")
+    else:
+        for finding in findings:
+            print(f"\nCategory: {finding['category']}")
+            print("Matched phrases:")
+            for phrase in finding["matched_phrases"]:
+                print(f"  - {phrase}")
 
-    print("\nThis tool cannot confirm whether a message is safe.")
+    print("\nReminder: this is a basic rule-based tool,")
+    print("not a definitive scam detector.")
 
 
 if __name__ == "__main__":
