@@ -29,6 +29,19 @@ WARNING_RULES = {
 }
 
 
+def contains_url(message):
+    """Return True if the message contains a URL with a plausible hostname."""
+
+    url_pattern = (
+        r"\bhttps?://"
+        r"(?:[a-z0-9-]+\.)+[a-z]{2,}"
+        r"(?::\d{1,5})?"
+        r"(?:[/?#][^\s]*)?"
+    )
+
+    return re.search(url_pattern, message, re.IGNORECASE) is not None
+
+
 def analyze_message(message):
     """Return warning categories and the phrases that triggered them."""
 
@@ -39,12 +52,19 @@ def analyze_message(message):
         raise ValueError("Message cannot be empty.")
 
     normalized_message = message.lower()
+    has_valid_url = contains_url(message)
+
     findings = []
 
     for category, keywords in WARNING_RULES.items():
         matched_phrases = []
 
         for keyword in keywords:
+            if keyword in ("http://", "https://"):
+                if has_valid_url and keyword in normalized_message:
+                    matched_phrases.append(keyword)
+                continue
+
             pattern = r"\b" + re.escape(keyword) + r"\b"
 
             if re.search(pattern, normalized_message):

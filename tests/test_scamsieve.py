@@ -73,5 +73,52 @@ class TestScamSieve(unittest.TestCase):
         self.assertIn("suspicious links", categories)
 
 
+    def test_detects_http_link_with_trailing_punctuation(self):
+        findings = analyze_message(
+            "Visit http://example.com."
+        )
+        categories = [item["category"] for item in findings]
+
+        self.assertIn("suspicious links", categories)
+
+    def test_detects_url_shortener_domain(self):
+        findings = analyze_message(
+            "Check this link: bit.ly/example"
+        )
+        categories = [item["category"] for item in findings]
+
+        self.assertIn("suspicious links", categories)
+
+
+
+    def test_ignores_incomplete_url_prefix(self):
+        findings = analyze_message(
+            "The text https:// appears in this sentence."
+        )
+        categories = [item["category"] for item in findings]
+
+        self.assertNotIn("suspicious links", categories)
+
+
+
+    def test_detects_url_with_path_and_query(self):
+        findings = analyze_message(
+            "Visit https://example.com/login?next=home"
+        )
+        categories = [item["category"] for item in findings]
+
+        self.assertIn("suspicious links", categories)
+
+    def test_incomplete_url_does_not_hide_other_warnings(self):
+        findings = analyze_message(
+            "URGENT! The text https:// appears here."
+        )
+        categories = [item["category"] for item in findings]
+
+        self.assertIn("urgent language", categories)
+        self.assertNotIn("suspicious links", categories)
+
+
+
 if __name__ == "__main__":
     unittest.main()
